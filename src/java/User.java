@@ -3,6 +3,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
 import javax.faces.bean.ManagedBean;
@@ -18,7 +19,7 @@ public class User{
     String gender;
     String address;
     ArrayList usersList ;
-    private Map<String,Object> sessionMap = FacesContext.getCurrentInstance().getExternalContext().getSessionMap();
+    private final Map<String,Object> sessionMap = FacesContext.getCurrentInstance().getExternalContext().getSessionMap();
     Connection connection;
     
     public int getId() {
@@ -62,7 +63,7 @@ public class User{
         try{
             Class.forName("com.mysql.jdbc.Driver");   
             connection = DriverManager.getConnection( "jdbc:mysql://localhost:3306/User","root","");
-        }catch(Exception e){
+        }catch(ClassNotFoundException | SQLException e){
             System.out.println(e);
         }
         return connection;
@@ -85,7 +86,7 @@ public class User{
                 usersList.add(user);
             }
             connection.close();        
-        }catch(Exception e){
+        }catch(SQLException e){
             System.out.println(e);
         }
         return usersList;
@@ -103,7 +104,7 @@ public class User{
             stmt.setString(5, address);
             result = stmt.executeUpdate();
             connection.close();
-        }catch(Exception e){
+        }catch(SQLException e){
             System.out.println(e);
         }
         if(result !=0)
@@ -112,7 +113,7 @@ public class User{
     }
     // Used to fetch record to update
     public String edit(int id){
-        User user = null;
+        User user;
         System.out.println(id);
         try{
             connection = getConnection();
@@ -129,7 +130,7 @@ public class User{
             System.out.println(rs.getString("password"));
             sessionMap.put("editUser", user);
             connection.close();
-        }catch(Exception e){
+        }catch(SQLException e){
             System.out.println(e);
         }       
         return "/edit.xhtml?faces-redirect=true";
@@ -148,7 +149,7 @@ public class User{
             stmt.setInt(6,u.getId());  
             stmt.executeUpdate();
             connection.close();
-        }catch(Exception e){
+        }catch(SQLException e){
             System.out.println();
         }
         return "/index.xhtml?faces-redirect=true";      
@@ -159,7 +160,7 @@ public class User{
             connection = getConnection();  
             PreparedStatement stmt = connection.prepareStatement("delete from users where id = "+id);  
             stmt.executeUpdate();  
-        }catch(Exception e){
+        }catch(SQLException e){
             System.out.println(e);
         }
     }
